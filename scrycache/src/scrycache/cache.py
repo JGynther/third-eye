@@ -110,7 +110,7 @@ async def download_image(
             return False
 
 
-async def main():
+async def download_with_cache():
     if not CARDS.exists():
         download_bulk_data()
 
@@ -139,7 +139,3 @@ async def main():
             success += 1
 
     print(f"✓ Downloaded {success}/{len(to_download)} images")
-
-
-if __name__ == "__main__":
-    asyncio.run(main())

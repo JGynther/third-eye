@@ -7,6 +7,8 @@ from transformers import AutoModel, AutoProcessor
 
 app = FastAPI()
 
+ImageFile.LOAD_TRUNCATED_IMAGES = True
+
 # MODEL = "google/siglip2-so400m-patch16-naflex"
 MODEL = "facebook/dinov2-base"
 batch_size = 128

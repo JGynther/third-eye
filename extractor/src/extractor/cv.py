@@ -52,9 +52,3 @@ def crop_card_bbox(image: cv2.typing.MatLike) -> list[cv2.typing.MatLike]:
         cropped_images.append(warped)
 
     return cropped_images
-
-
-def find_all_cards_from(image: str):
-    original = cv2.imread(image)
-    cards = crop_card_bbox(original)
-    return np.array(cards)

@@ -7,7 +7,7 @@ import httpx
 
 SCRYFALL_BULK_URI = "https://api.scryfall.com/bulk-data"
 
-CACHE = Path(".cache")
+CACHE = Path.home() / ".cache/third-eye"
 CARDS = CACHE / "cards.json"
 IMAGES = CACHE / "images"
 

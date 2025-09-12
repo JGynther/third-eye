@@ -1,81 +1,45 @@
+import asyncio
 import json
-from itertools import batched
-from pathlib import Path
 
 import faiss
-import httpx
-import numpy as np
-from tqdm import tqdm
 
-from extractor import find_all_cards_from
-from scrycache import refresh_scryfall_cache
-
-CACHE = Path(".cache")
-CARDS = CACHE / "cards.json"
-IMAGES = CACHE / "images"
-INDEX = CACHE / "cards.faiss"
-IDS = CACHE / "ids.txt"
+from matcher.index import get_embeddings
+from matcher.paths import CARDS, IDS, INDEX
+from matcher.yolo import get_bboxes
 
 
-def get_embeddings(paths: list[str]) -> np.typing.NDArray[np.float32]:
-    result = httpx.post(
-        "http://localhost:8000/embed",
-        json=paths,
-        timeout=60,
-    )
+def run_with_debug(img: str):
+    index = faiss.read_index(str(INDEX))
+    ids = IDS.read_text().splitlines()
 
-    result.raise_for_status()
-    json = result.json()
+    cards = json.loads(CARDS.read_bytes())
+    cards = {card["id"]: card for card in cards}
 
-    return np.array(json, dtype=np.float32)
+    images = asyncio.run(get_bboxes(img), debug=True)
+    embeddings = asyncio.run(get_embeddings(images))
+    scores, indices = index.search(embeddings, k=6)  # type: ignore
 
+    for scores, matches in zip(scores, indices):
+        score = scores[0]
+        match = matches[0]
 
-def create_index():
-    index = faiss.IndexFlatL2(768)  # 1152
+        # handle multifaced ids: _1 or _2 suffix
+        id = ids[match]
+        if id[-2] == "_":
+            id = id[:-2]
 
-    with IDS.open("w") as f:
-        for batch in tqdm(batched(IMAGES.glob("*.jpg"), 128)):
-            paths = [str(path) for path in batch]
-            embeddings = get_embeddings(paths)
-            index.add(embeddings)  # type: ignore
+        card = cards[id]
 
-            for path in batch:
-                f.write(f"{path.stem}\n")
-
-    faiss.write_index(index, str(INDEX))
-
-
-def main():
-    # refresh_scryfall_cache()
-
-    if not INDEX.exists():
-        create_index()
-
-    index: faiss.IndexFlatL2 = faiss.read_index(str(INDEX))
-
-    with IDS.open() as f:
-        ids = f.read().splitlines()
-
-    with CARDS.open() as f:
-        cards = json.load(f)
-
-    images = find_all_cards_from("images/IMG_5097.jpeg")
-    embeddings = get_embeddings(images)
-    scores, indices = index.search(embeddings, k=5)  # type: ignore
-
-    for i, (scores, matches) in enumerate(zip(scores, indices)):
-        print("img:", images[i])
-        for score, match in zip(scores, matches):
-            id = ids[match]
-            for card in cards:
-                if card["id"] == id:
-                    print(score, card["scryfall_uri"])
-                    break
-
-        print()
-
-    print("Done")
+        print(score, card["scryfall_uri"])
 
 
 if __name__ == "__main__":
-    main()
+    for img in [
+        "images/IMG_5183.jpeg",
+        # "images/IMG_5092.jpeg",
+        # "images/IMG_5175.jpeg",
+        # "images/IMG_5103.jpeg",
+        # "images/IMG_5102.jpeg",
+    ]:
+        run_with_debug(img)
+        print("\n\n\n")

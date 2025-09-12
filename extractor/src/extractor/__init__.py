@@ -3,18 +3,18 @@ from uuid import uuid4
 
 from cv2 import imread, imwrite
 
-from .cv import crop_card_bbox
+from .yolo import crop_card_obbox
 
 TMP = Path(".tmp")
 TMP.mkdir(exist_ok=True)
 
 
-def find_all_cards_from(image: str):
+def find_all_cards_from_obbox(image: str, debug=False):
     original = imread(image)
 
     ids: list[str] = []
 
-    for img in crop_card_bbox(original):
+    for img in crop_card_obbox(original, debug):
         id = str(TMP / f"{uuid4()}.jpg")
         imwrite(id, img)
         ids.append(id)

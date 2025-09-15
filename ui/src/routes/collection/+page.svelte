@@ -19,9 +19,11 @@
 <div class="p-10 flex flex-wrap gap-5">
     {#each data.collection.sort((a, b) => parseFloat(b.price) - parseFloat(a.price)) as card}
         <div class="w-[200px]">
-            <img src={card.image} alt="" class="rounded-lg" />
+            <a href={card.link} target="_blank">
+                <img src={card.image} alt="" class="rounded-lg" />
+            </a>
             <div>
-                <a href={card.link} target="_blank">{card.name}</a>
+                <p>{card.name}</p>
                 <p>{sortCard(card)}</p>
                 <p>{card.price}€</p>
             </div>

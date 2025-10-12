@@ -53,14 +53,13 @@ def list_sessions():
 
         return cursor.fetchall()
 
+
 def list_collection():
     with sqlite3.connect(DB) as conn:
         cursor = conn.execute(
             """
             SELECT card_id
             FROM matches
-            GROUP BY card_id
-            ORDER BY MAX(id) DESC;
             """
         )
 

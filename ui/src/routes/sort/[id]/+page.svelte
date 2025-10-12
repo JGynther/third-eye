@@ -6,7 +6,7 @@
 </script>
 
 <div class="grid">
-    {#each Object.values(data.grouped) as cards}
+    {#each Object.values(data.grouped).reverse() as cards}
         <div class="p-10 flex flex-wrap gap-5">
             {#each cards as card}
                 <div>

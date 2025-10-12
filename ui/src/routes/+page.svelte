@@ -34,7 +34,10 @@
     const handleSubmit = async () => {
         if (files.length === 0) return;
 
-        for (const file of files) {
+        const tmpFiles = [...files];
+        files = [];
+
+        for (const file of tmpFiles) {
             const upload: Upload = {
                 id: await uploadImage(file),
                 file: file,
@@ -63,8 +66,6 @@
             upload.matches.push(...candidates);
             appState.uploads.push(upload);
         }
-
-        files = [];
     };
 
     const handleComplete = async () => {
@@ -116,7 +117,15 @@
                         onchange={onFiles}
                         class="hidden"
                     />
-                    Drag & drop or click
+                    <div class="text-center">
+                        <p>Drag & drop or click</p>
+                        {#if files.length}
+                            <p class="italic opacity-60">
+                                Selected {files.length}
+                                {files.length === 1 ? "image" : "images"}
+                            </p>
+                        {/if}
+                    </div>
                 </label>
                 <button
                     class="bg-neutral-800 hover:bg-neutral-700 disabled:bg-neutral-600 p-2 rounded"
@@ -128,12 +137,19 @@
             </div>
         </div>
 
-        <div>
+        <div class="flex gap-4">
             <a
                 href="/collection"
                 class="border-2 border-neutral-600 bg-neutral-800 hover:bg-neutral-700 py-2 px-4 rounded-lg inline-block"
-                >Collection</a
             >
+                Collection
+            </a>
+            <a
+                href="/collection/search"
+                class="border-2 border-neutral-600 bg-neutral-800 hover:bg-neutral-700 py-2 px-4 rounded-lg inline-block"
+            >
+                Search
+            </a>
         </div>
 
         <div>

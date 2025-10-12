@@ -7,8 +7,8 @@ from uuid import uuid4
 import faiss
 from fastapi import FastAPI, HTTPException, Query, Request, UploadFile
 from fastapi.responses import FileResponse
+from scrycache import refresh_scryfall_cache
 
-# from scrycache import refresh_scryfall_cache
 from .db import get_session, init_db, insert_match, list_collection, list_sessions
 from .index import create_index, get_embeddings
 from .paths import CARDS, IDS, INDEX, OBJECTS, TMP
@@ -19,8 +19,7 @@ BATCH_SIZE = 128
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    # FIXME: handle refresh
-    # refresh_scryfall_cache()
+    await refresh_scryfall_cache()
 
     if not INDEX.exists():
         create_index()
@@ -134,6 +133,7 @@ def cards_by_id(cards: dict, ids: list[str]) -> list[dict]:
         if card := cards.get(id):
             results.append(
                 {
+                    "id": id,
                     "name": card["name"],
                     "link": card["scryfall_uri"],
                     "set": card["set"],

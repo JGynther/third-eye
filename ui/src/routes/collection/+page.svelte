@@ -11,13 +11,23 @@
     </div>
     <div>
         Total value maybe: {data.collection
-            .reduce((acc, c) => acc + parseFloat(c.price), 0.0)
+            .reduce((acc, c) => {
+                let float = parseFloat(c.price);
+
+                if (float < 0.95) {
+                    return acc;
+                }
+
+                return acc + float;
+            }, 0.0)
             .toFixed(2)} €
     </div>
 </div>
 
 <div class="p-10 flex flex-wrap gap-5">
-    {#each data.collection.sort((a, b) => parseFloat(b.price) - parseFloat(a.price)) as card}
+    {#each data.collection
+        .sort((a, b) => parseFloat(b.price) - parseFloat(a.price))
+        .slice(0, 250) as card}
         <div class="w-[200px]">
             <a href={card.link} target="_blank">
                 <img src={card.image} alt="" class="rounded-lg" />

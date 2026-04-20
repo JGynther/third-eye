@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [tailwindcss(), sveltekit()],
   server: {
     host: true,
-    allowedHosts: ["nixos-gaming"],
+    allowedHosts: ["hydrogen"],
     proxy: {
       "/api": {
         target: "http://localhost:8001",

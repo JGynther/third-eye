@@ -24,13 +24,13 @@ async def get_embeddings(paths: list[str]) -> np.typing.NDArray[np.float32]:
     return np.array(json, dtype=np.float32)
 
 
-def create_index():
+async def create_index():
     index = faiss.IndexFlatL2(384)  # 768, 1152
 
     with IDS.open("w") as f:
         for batch in tqdm(batched(IMAGES.glob("*.jpg"), BATCH_SIZE)):
             paths = [str(path) for path in batch]
-            embeddings = get_embeddings(paths)
+            embeddings = await get_embeddings(paths)
             index.add(embeddings)  # type: ignore
 
             for path in batch:

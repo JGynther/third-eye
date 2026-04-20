@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 from ultralytics import YOLO
 
-model = YOLO("best.pt", task="obb")
+model = YOLO("model.pt", task="obb")
 
 
 def order_points(pts):
@@ -24,7 +24,10 @@ def crop_card_obbox(image: cv2.typing.MatLike, debug=False):
     crops: list[cv2.typing.MatLike] = []
 
     for result in model.predict(image):
-        for points, conf in zip(result.obb.xyxyxyxy.numpy(), result.obb.conf.numpy()):  # type: ignore
+        for points, conf in zip(
+            result.obb.xyxyxyxy.cpu().numpy(),  # type: ignore
+            result.obb.conf.cpu().numpy(),  # type: ignore
+        ):
             if conf < 0.90:
                 continue
 

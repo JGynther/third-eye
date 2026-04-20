@@ -1,11 +1,12 @@
 <script lang="ts">
-    import { queueImage, listQueue } from "$lib";
+    import { detectImage, queueById, listQueue } from "$lib";
     import type { PageProps } from "./$types";
 
     let { data }: PageProps = $props();
 
     let queued = $state(data.queued);
-    let uploading = $state(false);
+    let status = $state<string | null>(null);
+    let rejected = $state(false);
 
     const refreshCount = async () => {
         const items = await listQueue();
@@ -17,10 +18,21 @@
         const file = input.files?.[0];
         if (!file) return;
 
-        uploading = true;
-        await queueImage(file);
+        rejected = false;
+        status = "Detecting...";
+        const { object_id, count } = await detectImage(file);
+
+        if (count === 0) {
+            status = null;
+            rejected = true;
+            input.value = "";
+            return;
+        }
+
+        status = "Queueing...";
+        await queueById(object_id);
         input.value = "";
-        uploading = false;
+        status = null;
         await refreshCount();
     };
 </script>
@@ -29,19 +41,25 @@
     <div class="text-4xl font-mono">{queued} in queue</div>
 
     <label
-        class="flex items-center justify-center w-64 h-64 border-4 border-neutral-600 border-dashed rounded-2xl cursor-pointer bg-neutral-800 active:bg-neutral-700 text-2xl"
-        class:opacity-50={uploading}
+        class="flex items-center justify-center w-64 h-64 border-4 border-dashed rounded-2xl cursor-pointer bg-neutral-800 active:bg-neutral-700 text-2xl"
+        class:border-red-500={rejected}
+        class:border-neutral-600={!rejected}
+        class:opacity-50={!!status}
     >
         <input
             type="file"
             accept="image/*"
             capture="environment"
             onchange={handleCapture}
-            disabled={uploading}
+            disabled={!!status}
             class="hidden"
         />
-        {uploading ? "Uploading..." : "Take photo"}
+        {status ?? "Take photo"}
     </label>
+
+    {#if rejected}
+        <div class="text-red-400 text-lg">No cards detected</div>
+    {/if}
 
     <a href="/" class="text-neutral-400 underline"> Back to review </a>
 </main>

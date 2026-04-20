@@ -196,15 +196,27 @@ async def serve_object(id: str):
     return FileResponse(OBJECTS / id)
 
 
-@app.post("/queue")
-async def queue_upload(request: Request, image: UploadFile) -> dict:
-    lock: asyncio.Lock = request.state.sqlite_write_lock
+@app.post("/detect")
+async def detect(image: UploadFile) -> dict:
     object_id = await save_object(image)
+    path = OBJECTS / object_id
+    images = await get_bboxes(str(path))
+
+    if not images:
+        path.unlink()
+
+    return {"object_id": object_id, "count": len(images)}
+
+
+@app.post("/queue/{object_id}")
+async def queue_existing(request: Request, object_id: str):
+    lock: asyncio.Lock = request.state.sqlite_write_lock
+
+    if not (OBJECTS / object_id).exists():
+        raise HTTPException(status_code=404, detail="Object not found")
 
     async with lock:
         await asyncio.to_thread(queue_image, object_id)
-
-    return {"object_id": object_id}
 
 
 @app.get("/queue")

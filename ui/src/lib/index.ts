@@ -54,8 +54,14 @@ const getCollection = async (f = fetch) => {
   return response.json();
 };
 
-const queueImage = async (file: File): Promise<{ object_id: string }> => {
-  return postFile("/queue", file);
+const detectImage = async (
+  file: File,
+): Promise<{ object_id: string; count: number }> => {
+  return postFile("/detect", file);
+};
+
+const queueById = async (objectId: string) => {
+  await fetch(`/api/queue/${objectId}`, { method: "POST" });
 };
 
 const listQueue = async (f = fetch): Promise<QueueItem[]> => {
@@ -84,7 +90,8 @@ export {
   listSessions,
   makeTmpImageUrl,
   getCollection,
-  queueImage,
+  detectImage,
+  queueById,
   listQueue,
   dequeue,
   makeObjectUrl,

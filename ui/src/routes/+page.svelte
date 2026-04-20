@@ -140,16 +140,16 @@
     };
 </script>
 
-<main class="m-5 flex flex-col gap-10">
-    <div class="flex gap-10 justify-between items-center">
+<main class="m-4 flex flex-col gap-6 md:gap-10">
+    <div class="flex flex-col gap-4 md:flex-row md:gap-10 md:justify-between md:items-center">
         <div>
-            <h2 class="font-mono text-sm mb-5">
+            <h2 class="font-mono text-sm mb-3 md:mb-5">
                 SESSION: {appState.sessionId}
             </h2>
 
-            <div class="flex gap-4 items-center">
+            <div class="flex flex-wrap gap-3 items-center">
                 <label
-                    class="flex justify-center items-center h-28 w-68 border-2 border-neutral-600 border-dashed rounded-lg cursor-pointer bg-neutral-800 hover:bg-neutral-700"
+                    class="flex justify-center items-center h-24 w-full md:h-28 md:w-68 border-2 border-neutral-600 border-dashed rounded-lg cursor-pointer bg-neutral-800 hover:bg-neutral-700"
                 >
                     <input
                         type="file"
@@ -204,7 +204,7 @@
 
         <div>
             <button
-                class="text-xl bg-neutral-800 hover:bg-neutral-700 disabled:bg-neutral-600 py-5 px-10 rounded"
+                class="w-full md:w-auto text-xl bg-neutral-800 hover:bg-neutral-700 disabled:bg-neutral-600 py-5 px-10 rounded"
                 disabled={numOfNewCards === 0}
                 onclick={handleComplete}
             >
@@ -238,19 +238,21 @@
         <div class="flex flex-col gap-10">
             <div class="flex flex-col">
                 {#if card}
-                    <div class="flex gap-10 mb-10">
-                        <img
-                            src={card.image}
-                            alt=""
-                            class="w-[300px] border-4 border-sky-500 border-dashed rounded-2xl"
-                        />
-                        <img
-                            src={match.img}
-                            alt=""
-                            class="w-[300px] border-4 border-rose-500 border-dashed rounded-2xl"
-                        />
+                    <div class="flex flex-col md:flex-row gap-4 md:gap-10 mb-6 md:mb-10">
+                        <div class="flex gap-4 md:gap-10">
+                            <img
+                                src={card.image}
+                                alt=""
+                                class="w-[140px] md:w-[300px] border-4 border-sky-500 border-dashed rounded-2xl"
+                            />
+                            <img
+                                src={match.img}
+                                alt=""
+                                class="w-[140px] md:w-[300px] border-4 border-rose-500 border-dashed rounded-2xl"
+                            />
+                        </div>
                         <div>
-                            <div class="mb-10 text-2xl">
+                            <div class="mb-4 md:mb-10 text-lg md:text-2xl">
                                 <div>{card.name}</div>
                                 <div>{card.set_name} ({card.set})</div>
                                 <div>
@@ -258,13 +260,13 @@
                                         4,
                                     )})
                                 </div>
-                                <div class="mt-4 text-base font-mono">
+                                <div class="mt-2 md:mt-4 text-sm md:text-base font-mono">
                                     PRICE: {card.price}€ RANK: {card.edhrec}
                                 </div>
                             </div>
-                            <div class="flex text-xl gap-5 items-center">
+                            <div class="flex text-lg md:text-xl gap-3 md:gap-5 items-center">
                                 <button
-                                    class="bg-neutral-800 hover:bg-neutral-700 py-3 px-6 rounded"
+                                    class="bg-neutral-800 hover:bg-neutral-700 py-2 px-4 md:py-3 md:px-6 rounded"
                                     onclick={() => {
                                         match.status = "CONFIRMED";
                                         match.matchId = card.id;
@@ -275,7 +277,7 @@
                                     Confirm
                                 </button>
                                 <button
-                                    class="bg-neutral-800 hover:bg-neutral-700 py-3 px-6 rounded"
+                                    class="bg-neutral-800 hover:bg-neutral-700 py-2 px-4 md:py-3 md:px-6 rounded"
                                     onclick={() => {
                                         match.status = "DISCARDED";
                                         upload.active += 1;
@@ -309,7 +311,7 @@
                                 <img
                                     src={card.image}
                                     alt=""
-                                    class="max-w-[200px] rounded-xl hover:opacity-50 cursor-pointer"
+                                    class="max-w-[100px] md:max-w-[200px] rounded-xl hover:opacity-50 cursor-pointer"
                                 />
                             </button>
                         {/each}
@@ -317,8 +319,8 @@
                 {/if}
             </div>
 
-            <div class="flex gap-4">
-                <div class="w-[600px] mb-4">
+            <div class="flex flex-col md:flex-row gap-4">
+                <div class="w-full md:w-[600px] mb-4">
                     <img
                         src={upload.objectURL}
                         alt=""

@@ -19,7 +19,6 @@ type Candidate = {
 
 type Upload = {
   id: string;
-  file: File;
   objectURL: string;
   matches: Candidate[];
   active: number;
@@ -31,7 +30,7 @@ type AppState = {
 };
 
 const appState = $state<AppState>({
-  sessionId: crypto.randomUUID(),
+  sessionId: "",
   uploads: [],
 });
 

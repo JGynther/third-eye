@@ -5,6 +5,10 @@
         putMatch,
         getCards,
         makeTmpImageUrl,
+        listQueue,
+        dequeue,
+        makeObjectUrl,
+        newSession,
     } from "$lib";
     import { appState, type Upload, type Candidate } from "$lib/state.svelte";
     import { goto } from "$app/navigation";
@@ -17,6 +21,15 @@
     let uploadIndex = $state(0);
     let cardIndex = $state(0);
 
+    let queue = $state(data.queue);
+    let reviewingQueue = $state(false);
+
+    appState.sessionId = data.sessionId;
+
+    const refreshQueue = async () => {
+        queue = await listQueue();
+    };
+
     let numOfNewCards = $derived(
         appState.uploads.reduce(
             (acc, cur) =>
@@ -25,6 +38,31 @@
             0,
         ),
     );
+
+    const processUpload = async (upload: Upload) => {
+        const similar = await findSimilar(upload.id);
+
+        if (similar.length === 0) return;
+
+        const allIds = similar.flatMap((row) => row.matches.map((m) => m.id));
+        const allCards = await getCards(allIds);
+        const cardsById = Object.fromEntries(
+            allCards.map((c) => [c.id, c]),
+        );
+
+        const candidates: Candidate[] = similar.map((row) => ({
+            cards: row.matches.map((match) => ({
+                ...match,
+                ...cardsById[match.id],
+            })),
+            img: makeTmpImageUrl(row.img),
+            status: "WAITING",
+            matchId: null,
+        }));
+
+        upload.matches.push(...candidates);
+        appState.uploads.push(upload);
+    };
 
     const onFiles = (event: Event) => {
         const target = event.target as HTMLInputElement;
@@ -40,31 +78,34 @@
         for (const file of tmpFiles) {
             const upload: Upload = {
                 id: await uploadImage(file),
-                file: file,
                 objectURL: URL.createObjectURL(file),
                 matches: [],
                 active: 0,
             };
 
-            const similar = await findSimilar(upload.id);
+            await processUpload(upload);
+        }
+    };
 
-            const candidates: Candidate[] = await Promise.all(
-                similar.map(async (row) => {
-                    const cards = await getCards(row.matches.map((m) => m.id));
-                    return {
-                        cards: row.matches.map((match, i) => ({
-                            ...match,
-                            ...cards[i],
-                        })),
-                        img: makeTmpImageUrl(row.img),
-                        status: "WAITING",
-                        matchId: null,
-                    };
-                }),
-            );
+    const handleReviewQueue = async () => {
+        if (queue.length === 0) return;
+        reviewingQueue = true;
 
-            upload.matches.push(...candidates);
-            appState.uploads.push(upload);
+        try {
+            for (const item of queue) {
+                const upload: Upload = {
+                    id: item.object_id,
+                    objectURL: makeObjectUrl(item.object_id),
+                    matches: [],
+                    active: 0,
+                };
+
+                await processUpload(upload);
+                await dequeue(item.id);
+            }
+        } finally {
+            await refreshQueue();
+            reviewingQueue = false;
         }
     };
 
@@ -84,7 +125,7 @@
         }
 
         // Reset session
-        appState.sessionId = crypto.randomUUID();
+        appState.sessionId = await newSession();
         appState.uploads = [];
 
         // Navigate to report
@@ -133,6 +174,15 @@
                     disabled={files.length === 0}
                 >
                     Upload images
+                </button>
+                <button
+                    class="bg-neutral-800 hover:bg-neutral-700 disabled:bg-neutral-600 p-2 rounded"
+                    onclick={handleReviewQueue}
+                    disabled={queue.length === 0 || reviewingQueue}
+                >
+                    {reviewingQueue
+                        ? "Processing..."
+                        : `Review queue (${queue.length})`}
                 </button>
             </div>
         </div>

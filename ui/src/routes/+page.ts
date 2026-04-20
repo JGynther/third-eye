@@ -1,9 +1,13 @@
 import type { PageLoad } from "./$types";
-import { listSessions } from "$lib";
+import { listSessions, listQueue, newSession } from "$lib";
 
-const load: PageLoad = async () => {
-  const sessions: string[][] = await listSessions();
-  return { sessions: sessions.map(([session]) => session) };
+const load: PageLoad = async ({ fetch }) => {
+  const [sessions, queue, sessionId] = await Promise.all([
+    listSessions(fetch),
+    listQueue(fetch),
+    newSession(fetch),
+  ]);
+  return { sessions: sessions.map(([session]: string[]) => session), queue, sessionId };
 };
 
 export { load };

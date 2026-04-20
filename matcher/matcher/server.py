@@ -9,12 +9,19 @@ from fastapi import FastAPI, HTTPException, Query, Request, UploadFile
 from fastapi.responses import FileResponse
 from scrycache import refresh_scryfall_cache
 
-from .db import get_session, init_db, insert_match, list_collection, list_sessions
+from .db import (
+    dequeue_image,
+    get_session,
+    init_db,
+    insert_match,
+    list_collection,
+    list_queue,
+    list_sessions,
+    queue_image,
+)
 from .index import create_index, get_embeddings
 from .paths import CARDS, IDS, INDEX, OBJECTS, TMP
 from .yolo import get_bboxes
-
-BATCH_SIZE = 128
 
 
 @asynccontextmanager
@@ -22,7 +29,7 @@ async def lifespan(_: FastAPI):
     await refresh_scryfall_cache()
 
     if not INDEX.exists():
-        create_index()
+        await create_index()
 
     # Prepare SQLite db
     init_db()
@@ -47,14 +54,21 @@ async def lifespan(_: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 
+async def save_object(image: UploadFile) -> str:
+    object_id = str(uuid4())
+    path = OBJECTS / object_id
+    path.write_bytes(await image.read())
+    return object_id
+
+
+@app.post("/new-session")
+async def new_session() -> str:
+    return str(uuid4())
+
+
 @app.post("/upload-image")
 async def upload(image: UploadFile) -> str:
-    id = str(uuid4())
-
-    path = OBJECTS / id
-    path.write_bytes(await image.read())
-
-    return id
+    return await save_object(image)
 
 
 @app.get("/similar-from-image/{id}")
@@ -64,6 +78,10 @@ async def similar(request: Request, id: str):
 
     path = OBJECTS / id
     images = await get_bboxes(str(path))
+
+    if not images:
+        return []
+
     embeddings = await get_embeddings(images)
     scores, indices = index.search(embeddings, k=9)  # type: ignore
 
@@ -171,6 +189,35 @@ async def sessions():
 @app.get("/tmp/images/{image}")
 async def tmp(image: str):
     return FileResponse(TMP / image)
+
+
+@app.get("/objects/{id}")
+async def serve_object(id: str):
+    return FileResponse(OBJECTS / id)
+
+
+@app.post("/queue")
+async def queue_upload(request: Request, image: UploadFile) -> dict:
+    lock: asyncio.Lock = request.state.sqlite_write_lock
+    object_id = await save_object(image)
+
+    async with lock:
+        await asyncio.to_thread(queue_image, object_id)
+
+    return {"object_id": object_id}
+
+
+@app.get("/queue")
+async def queue_list():
+    return await asyncio.to_thread(list_queue)
+
+
+@app.delete("/queue/{id}")
+async def queue_delete(request: Request, id: int):
+    lock: asyncio.Lock = request.state.sqlite_write_lock
+
+    async with lock:
+        await asyncio.to_thread(dequeue_image, id)
 
 
 @app.get("/collection")

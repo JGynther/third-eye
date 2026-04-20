@@ -2,8 +2,8 @@ import type { PageLoad } from "./$types";
 import { getCollection } from "$lib";
 import type { Card } from "$lib/state.svelte";
 
-const load: PageLoad = async () => {
-  const collection: Card[] = await getCollection();
+const load: PageLoad = async ({ fetch }) => {
+  const collection: Card[] = await getCollection(fetch);
   const id_to_card: Record<string, Card> = Object.fromEntries(
     collection.map((c) => [c.id, c]),
   );

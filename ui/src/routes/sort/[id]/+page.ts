@@ -4,10 +4,10 @@ import type { Card } from "$lib/state.svelte";
 
 type Session = [number, string, string, string][];
 
-const load: PageLoad = async ({ params }) => {
-  const session: Session = await loadSession(params.id);
+const load: PageLoad = async ({ params, fetch }) => {
+  const session: Session = await loadSession(params.id, fetch);
   const ids = session.map(([, id]) => id);
-  const cards: Card[] = await getCards(ids);
+  const cards: Card[] = await getCards(ids, fetch);
 
   const grouped: Record<string, Card[]> = {};
 

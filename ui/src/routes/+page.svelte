@@ -187,21 +187,6 @@
             </div>
         </div>
 
-        <div class="flex gap-4">
-            <a
-                href="/collection"
-                class="border-2 border-neutral-600 bg-neutral-800 hover:bg-neutral-700 py-2 px-4 rounded-lg inline-block"
-            >
-                Collection
-            </a>
-            <a
-                href="/collection/search"
-                class="border-2 border-neutral-600 bg-neutral-800 hover:bg-neutral-700 py-2 px-4 rounded-lg inline-block"
-            >
-                Search
-            </a>
-        </div>
-
         <div>
             <button
                 class="w-full md:w-auto text-xl bg-neutral-800 hover:bg-neutral-700 disabled:bg-neutral-600 py-5 px-10 rounded"

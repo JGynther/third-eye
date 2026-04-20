@@ -37,7 +37,7 @@
     };
 </script>
 
-<main class="flex flex-col items-center justify-center min-h-screen p-4 gap-8">
+<main class="flex flex-col items-center justify-center flex-1 p-4 gap-8">
     <div class="text-4xl font-mono">{queued} in queue</div>
 
     <label
@@ -61,5 +61,4 @@
         <div class="text-red-400 text-lg">No cards detected</div>
     {/if}
 
-    <a href="/" class="text-neutral-400 underline"> Back to review </a>
 </main>

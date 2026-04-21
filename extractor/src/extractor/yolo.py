@@ -1,8 +1,11 @@
+from pathlib import Path
+
 import cv2
 import numpy as np
 from ultralytics import YOLO
 
-model = YOLO("model.pt", task="obb")
+MODEL = Path.home() / ".local/share/third-eye/model.pt"
+model = YOLO(MODEL, task="obb")
 
 
 def order_points(pts):

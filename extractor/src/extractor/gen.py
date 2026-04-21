@@ -4,8 +4,6 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-from extractor.cv import SCALE_FACTOR
-
 # random.seed(42)
 
 

@@ -2,7 +2,6 @@ import asyncio
 import json
 
 import faiss
-
 from matcher.index import get_embeddings
 from matcher.paths import CARDS, IDS, INDEX
 from matcher.yolo import get_bboxes

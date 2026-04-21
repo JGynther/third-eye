@@ -87,9 +87,7 @@ def queue_image(object_id: str):
 def list_queue():
     with sqlite3.connect(DB) as conn:
         conn.row_factory = sqlite3.Row
-        cursor = conn.execute(
-            "SELECT id, object_id, created_at FROM queue ORDER BY created_at"
-        )
+        cursor = conn.execute("SELECT id, object_id, created_at FROM queue ORDER BY created_at")
         return [dict(row) for row in cursor.fetchall()]
 
 

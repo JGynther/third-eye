@@ -7,6 +7,7 @@ from uuid import uuid4
 import faiss
 from fastapi import FastAPI, HTTPException, Query, Request, UploadFile
 from fastapi.responses import FileResponse
+
 from scrycache import refresh_scryfall_cache
 
 from .db import (

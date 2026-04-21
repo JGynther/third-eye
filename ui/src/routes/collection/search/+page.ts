@@ -4,9 +4,7 @@ import type { Card } from "$lib/state.svelte";
 
 const load: PageLoad = async ({ fetch }) => {
   const collection: Card[] = await getCollection(fetch);
-  const id_to_card: Record<string, Card> = Object.fromEntries(
-    collection.map((c) => [c.id, c]),
-  );
+  const id_to_card: Record<string, Card> = Object.fromEntries(collection.map((c) => [c.id, c]));
 
   const names = collection.map((c) => c.name.toLowerCase());
   const ids = collection.map((c) => c.id);

@@ -60,5 +60,4 @@
     {#if rejected}
         <div class="text-red-400 text-lg">No cards detected</div>
     {/if}
-
 </main>

@@ -46,17 +46,14 @@ const listSessions = async (f = fetch) => {
   return response.json();
 };
 
-const makeTmpImageUrl = (image: string) =>
-  `/api/tmp/images/${image.slice(5)}`;
+const makeTmpImageUrl = (image: string) => `/api/tmp/images/${image.slice(5)}`;
 
 const getCollection = async (f = fetch) => {
   const response = await f(`/api/collection`);
   return response.json();
 };
 
-const detectImage = async (
-  file: File,
-): Promise<{ object_id: string; count: number }> => {
+const detectImage = async (file: File): Promise<{ object_id: string; count: number }> => {
   return postFile("/detect", file);
 };
 

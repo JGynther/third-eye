@@ -127,10 +127,7 @@ async def download_with_cache():
 
     async with httpx.AsyncClient() as client:
         async with asyncio.TaskGroup() as tg:
-            tasks = [
-                tg.create_task(download_image(semaphore, client, id, uri, path))
-                for id, uri, path in to_download
-            ]
+            tasks = [tg.create_task(download_image(semaphore, client, id, uri, path)) for id, uri, path in to_download]
 
     success = 0
 
